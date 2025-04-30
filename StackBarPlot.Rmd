@@ -1,0 +1,58 @@
+---
+title: "Stacked Bar Plot of HLA Allele Frequencies"
+author: "Aylar Babaei"
+date: "2025-04-30"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(readr)
+library(viridis)
+library(hrbrthemes)
+library(dplyr)
+```
+
+## Load Function and Plot HLA Alleles
+
+```{r hla-plot-function}
+plot_hla_locus <- function(file_path, locus_name) {
+  data <- read_delim(file_path, delim = "\t")
+
+  data <- data %>%
+    mutate(
+      Allele_for_plot = ifelse(Frequency < 0.05, "Others", Allele),
+      Frequency_for_plot = Frequency
+    ) %>%
+    group_by(Allele_for_plot) %>%
+    summarise(Frequency = sum(Frequency_for_plot)) %>%
+    ungroup() %>%
+    mutate(
+      AlleleLabel = paste0(Allele_for_plot, " (", round(Frequency * 100, 2), "%)")
+    )
+
+  data$AlleleLabel <- factor(data$AlleleLabel, levels = data$AlleleLabel[order(-data$Frequency)])
+  data$Locus <- locus_name
+
+  ggplot(data, aes(x = Locus, y = Frequency, fill = AlleleLabel)) +
+    geom_bar(stat = "identity", position = "stack", color = "white", size = 0.3) +
+    scale_fill_viridis(discrete = TRUE, option = "D") +
+    theme_void() +
+    theme(
+      legend.title = element_blank(),
+      plot.title = element_text(hjust = 0.5, size = 14, face = "bold")
+    ) +
+    ggtitle(paste0(locus_name, " Allele Frequency Distribution"))
+}
+```
+
+```{r hla-a}
+plot_hla_locus("/path/to/HLA_LocusA_Allele_Frequencies.txt", "HLA-A")
+```
+
+```{r hla-b}
+plot_hla_locus("/path/to/HLA_LocusB_Allele_Frequencies.txt", "HLA-B")
+```
+
+\`\`\`{r hla-c} plot_hla_locus("/path/to/HLA_LocusC_Allele_Frequencies.txt", "HLA-C")
