@@ -1,4 +1,3 @@
-# Plots
 # Stacked Bar Plot of HLA Allele Frequencies
 
 This project generates stacked bar plots showing the frequency distribution of HLA class I alleles (HLA-A, HLA-B, HLA-C) from allele frequency data.
